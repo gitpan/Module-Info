@@ -1,11 +1,22 @@
 package B::Module::Info;
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 use B;
 use B::Utils qw(walkoptree_filtered walkoptree_simple
                 opgrep all_roots);
 @B::Utils::bad_stashes = qw();  # give us everything.
+
+{
+    # From: Roland Walker <walker@ncbi.nlm.nih.gov>
+    # "Syntax OK" may land inside output and render it unusable
+    my $oldfh = select STDERR; $| = 1; # STDERR is unbuffered, but just in case
+    select STDOUT; $| = 1;
+    select $oldfh;
+}
+
+my $the_file = $0; # when walking all subroutines, you need to skip
+                   # the ones in other modules
 
 sub state_change {
     return opgrep {name => [qw(nextstate dbstate setstate)]}, @_
@@ -30,6 +41,23 @@ sub filtered_roots {
     return %filtered_roots;
 }
 
+
+=head2 roots_cv_pairs
+
+Returns a list of pairs, each containing a root with the relative
+B::CV object; this list includes B::main_root/cv.
+
+=cut
+
+sub roots_cv_pairs {
+    my %roots = filtered_roots;
+    my @roots = ( [ B::main_root, B::main_cv ],
+                  map { [ $roots{$_},
+                          B::svref_2object(\&{$_}) ] }
+                  keys %roots );
+}
+
+
 my %modes = (
              packages => sub { 
                  walkoptree_filtered(B::main_root,
@@ -46,9 +74,19 @@ my %modes = (
              },
              modules_used => sub {
                  # begin_av is an undocumented B function.
-                 foreach my $begin_cv (B::begin_av->ARRAY) {
+                 # note: if module hasn't any BEGIN block,
+                 #       begin_av will be a B::SPECIAL
+                 my @arr = B::begin_av->isa('B::SPECIAL') ?
+                           () :
+                           B::begin_av->ARRAY;
+                 foreach my $begin_cv (@arr) {
                      my $root = $begin_cv->ROOT;
                      local $CurCV = $begin_cv;
+
+                     next unless $begin_cv->FILE eq $the_file;
+                     # cheat otherwise show_require guard prevents display
+                     local $B::Utils::file = $begin_cv->FILE;
+                     local $B::Utils::line = $begin_cv->START->line;
 
                      my $lineseq = $root->first;
                      next if $lineseq->name ne 'lineseq';
@@ -63,24 +101,31 @@ my %modes = (
                          $module =~ s/.pm$//;
                      }
                      else {
-                         $module = const(const_sv($req_op->first));
+                         # if it is not bare it can't be an "use"
+                         show_require($req_op);
+                         next;
                      }
 
                      printf "use %s at %s line %s\n", $module,
                                                       $begin_cv->FILE, 
                                                       $begin_cv->START->line;
-                                                      
                  }
 
-                 walkoptree_filtered(B::main_root,
+                 {
+                     foreach my $p ( roots_cv_pairs ) {
+                         local $CurCV = $p->[1];
+                         walkoptree_filtered($p->[0],
                                      \&is_require,
                                      \&show_require,
                                     );
+                     }
+                 }
              },
              subs_called => sub {
                  my %roots = filtered_roots;
-                 foreach my $op (B::main_root, values %roots) {
-                     walkoptree_filtered($op,
+                 foreach my $p ( roots_cv_pairs ) {
+                     local $CurCV = $p->[1];
+                     walkoptree_filtered($p->[0],
                                          \&sub_call,
                                          \&sub_check );
                  }
@@ -90,10 +135,17 @@ my %modes = (
 
 sub const_sv {
     my $op = shift;
-    my $sv = $op->sv;
+    my $sv = $op->sv if $op->can('sv');
     # the constant could be in the pad (under useithreads)
     $sv = padval($op->targ) unless $$sv;
     return $sv;
+}
+
+# Don't do this for regexes
+sub unback {
+    my($str) = @_;
+    $str =~ s/\\/\\\\/g;
+    return $str;
 }
 
 sub const {
@@ -148,7 +200,6 @@ sub single_delim {
 
 sub padval {
     my $targ = shift;
-    #cluck "curcv was undef" unless $self->{curcv};
     return (($CurCV->PADLIST->ARRAY)[1]->ARRAY)[$targ];
 }
 
@@ -177,6 +228,7 @@ sub is_require {
 }
 
 sub show_require {
+    return unless $B::Utils::file eq $the_file;
     my($op) = shift;
 
     my($name, $bare);
@@ -195,11 +247,11 @@ sub show_require {
                 $kid = $kid->first;
             }
 
-            my $sv = $kid->sv;
-            $name = $sv->isa("B::PV") ? $sv->PV : 
-                    $sv->isa("B::NV") ? $sv->NV 
-                                      : $sv->IV;
-                       
+            my $sv = const_sv($kid);
+            return unless defined $sv && !$sv->isa('B::NULL');
+            $name   = $sv->isa("B::PV") ? $sv->PV : '';
+            $name ||= $sv->isa("B::NV") ? $sv->NV : 0;
+            $name ||= $sv->IV;
         }       
         else {
             $name = "";
@@ -217,7 +269,7 @@ sub compile {
 
 
 sub sub_call {
-    $_[0]->name eq 'entersub';
+    B::class($_[0]) ne 'NULL' && $_[0]->name eq 'entersub';
 }
 
 sub sub_check {
@@ -251,8 +303,9 @@ sub sub_check {
     else {
         my($name_op) = grep($_->name eq 'gv', @kids);
         if( $name_op ) {
+            my $gv = gv_or_padgv($name_op);
             printf "function call to %s at %s line %d\n", 
-              $name_op->gv->NAME, $B::Utils::file, $B::Utils::line;
+              $gv->NAME, $B::Utils::file, $B::Utils::line;
         }
         else {
             printf "function call using symbolic ref at %s line %d\n",
@@ -262,13 +315,25 @@ sub sub_check {
 }
 
 
+sub gv_or_padgv {
+#    my $self = shift;
+    my $op = shift;
+    if ($op->isa("B::PADOP")) {
+        return padval($op->padix);
+    }
+    else { # class($op) eq "SVOP"
+        return $op->gv;
+    }
+}
+
+
 sub _class_or_object_method {
     my @kids = @_;
 
     my $class;
     my($classop) = $kids[1];
     if( $classop->name eq 'const' ) {
-        $class = $classop->sv->PV;
+        $class = const_sv($classop)->PV;
     }
 
     return $class;
