@@ -4,7 +4,10 @@ use lib qw(t/lib);
 use Test::More tests => 51;
 use Config;
 
-my $Mod_Info_VERSION = '0.11';
+my $Mod_Info_VERSION = '0.12';
+
+my @old5lib = defined $ENV{PERL5LIB} ? ($ENV{PERL5LIB}) : ();
+$ENV{PERL5LIB} = join ':', 'blib/lib', @old5lib;
 
 use_ok('Module::Info');
 my @expected_subs = qw(
@@ -164,7 +167,7 @@ SKIP: {
                           {
                            line     => 25,
                            class    => undef,
-                           type     => 'function',
+                           type     => 'symbolic function',
                            name     => undef,
                           },
                           {
@@ -174,21 +177,21 @@ SKIP: {
                            name     => 'wibble',
                           },
                           {
-                           line     => 28,
+                           line     => 27,
                            class    => undef,
                            type     => 'object method',
                            name     => 'wibble',
                           },
                           {
-                           line     => 30,
-                           class    => 'Foo',
-                           type     => 'dynamic class method',
-                           name     => undef,
+                           line     => 29,
+                           class    => undef,
+                           type     => 'object method',
+                           name     => 'wibble',
                           },
                           {
                            line     => 31,
-                           class    => undef,
-                           type     => 'dynamic object method',
+                           class    => 'Foo',
+                           type     => 'dynamic class method',
                            name     => undef,
                           },
                           {
@@ -199,12 +202,18 @@ SKIP: {
                           },
                           {
                            line     => 33,
+                           class    => undef,
+                           type     => 'dynamic object method',
+                           name     => undef,
+                          },
+                          {
+                           line     => 34,
                            class    => 'Foo',
                            type     => 'dynamic class method',
                            name     => undef,
                           },
                           {
-                           line     => 37,
+                           line     => 38,
                            class    => undef,
                            type     => 'object method',
                            name     => 'wibble'
