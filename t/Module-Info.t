@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 
 use lib qw(t/lib);
-use Test::More tests => 18;
+use Test::More tests => 24;
 use Config;
 
-my $Mod_Info_VERSION = 0.01;
+my $Mod_Info_VERSION = 0.02;
 
 use_ok('Module::Info');
 can_ok('Module::Info', qw(new_from_file new_from_module all_installed
@@ -48,3 +48,15 @@ is( $mod_info->file,
     File::Spec->catfile( $mod_info->inc_dir, 'Text/Soundex.pm' ),
                                             '    file()');
 ok( $mod_info->is_core,                     '    core module' );
+
+
+$mod_info = Module::Info->new_from_loaded('Module::Info');
+isa_ok($mod_info, 'Module::Info', 'new_from_module');
+
+is( $mod_info->name, 'Module::Info',        '    name()' );
+is( $mod_info->version, $Mod_Info_VERSION,  '    version()' );
+is( $mod_info->inc_dir, File::Spec->rel2abs('blib/lib'),
+                                            '    inc_dir' );
+is( $mod_info->file, File::Spec->rel2abs('blib/lib/Module/Info.pm'),
+                                            '    file()');
+ok( !$mod_info->is_core,                    '    not a core module' );

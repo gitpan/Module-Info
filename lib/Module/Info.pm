@@ -5,7 +5,7 @@ use File::Spec;
 use Config;
 
 use vars qw($VERSION);
-$VERSION = 0.01;
+$VERSION = 0.02;
 
 
 =head1 NAME
@@ -18,6 +18,8 @@ Module::Info - Information about Perl modules
 
   my $mod = Module::Info->new_from_file('Some/Module.pm');
   my $mod = Module::Info->new_from_module('Some::Module');
+  my $mod = Module::Info->new_from_loaded('Some::Module');
+
   my @mods = Module::Info->all_installed('Some::Module');
 
   my $name    = $mod->name;
@@ -52,11 +54,15 @@ They all return Module::Info objects.
 Given a file, it will interpret this as the module you want
 information about.
 
+If the file doesn't exist or isn't readable it will return false.
+
 =cut
 
 sub new_from_file {
     my($proto, $file) = @_;
     my($class) = ref $proto || $proto;
+
+    return unless -r $file;
 
     my $self = {};
     $self->{file} = File::Spec->rel2abs($file);
@@ -82,6 +88,29 @@ If you give your own @INC, that will be used to search instead.
 sub new_from_module {
     my($class, $module, @inc) = @_;
     return ($class->_find_all_installed($module, 1, @inc))[0];
+}
+
+=item new_from_loaded
+
+  my $module = Module::Info->new_from_loaded('Some::Module');
+
+Gets information about the currently loaded version of Some::Module.
+If it isn't loaded, returns false.
+
+=cut
+
+sub new_from_loaded {
+    my($class, $name) = @_;
+
+    my $mod_file = join('/', split('::', $name)) . '.pm';
+    my $filepath = $INC{$mod_file} || '';
+
+    my $module = Module::Info->new_from_file($filepath);
+    $module->{name} = $name;
+    ($module->{dir} = $filepath) =~ s|/?$mod_file$||;
+    $module->{dir} = File::Spec->rel2abs($module->{dir});
+
+    return $module;
 }
 
 =item all_installed
