@@ -1,7 +1,13 @@
-0.20
+0.21  Fri Aug 15 18:48:53 CEST 2003
+    - Add licensing information to Module::Info POD.
+    + Add modules_required(). Original patch by Martyn J. Pearce,
+      adapted by me (Mattia Barbon).
+
+0.20  Thu May 22 10:30:31 CEST 2003
     - Fixed a warning in module_info (thanks to Nathan Torkington)
     - Corrected number of skipped tests for Perl versions earlier
-      thank 5.6.1 (thanks to Mike Fragassi)
+      than 5.6.1 (thanks to Mike Fragassi)
+    - Fixed syntax error with Perl 5.004.
 
 0.19  Tue Apr  1 15:45:43 CEST 2003
     + Added package_versions() (patch by Ken Williams).
