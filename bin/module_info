@@ -129,9 +129,9 @@ EOT
         print "\nPackages created:\n";
         foreach my $p (sort keys %packages_created) {
             print "    $p\t";
-            print ( defined( $packages_created{$p} ) ?
-                               $packages_created{$p} :
-                                     '(no version)' );
+            print +( defined( $packages_created{$p} ) ?
+                                $packages_created{$p} :
+                                      '(no version)' );
             print "\n";
         }
         print "    (none)\n" unless keys %packages_created;
