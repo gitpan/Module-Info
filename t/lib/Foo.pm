@@ -10,5 +10,6 @@ $foo = 42;
 
 sub wibble {
     package Wibble;
+    $foo = 42;
     return 66;
 }
