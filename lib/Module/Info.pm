@@ -7,7 +7,7 @@ use Config;
 require 5.004;
 
 use vars qw($VERSION);
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 
 =head1 NAME
@@ -44,6 +44,10 @@ Module::Info - Information about Perl modules
   my @lines     = $mod->gotos;          *UNIMPLEMENTED*
   my @controls  = $mod->exit_via_loop_control;      *UNIMPLEMENTED*
   my @unpredictables = $mod->has_unpredictables;    *UNIMPLEMENTED*
+
+  # set/get Module::Info options
+  $self->die_on_compilation_error(1);
+  my $die_on_error = $mod->die_on_compilation_error;
 
 =head1 DESCRIPTION
 
@@ -412,15 +416,21 @@ sub subroutines {
             grep /at \Q$mod_file\E /, @subs;
 }
 
-sub _is_win95 {
+sub _is_win95() {
     return $^O eq 'MSWin32' && Win32::GetOSVersion() == 1;
 }
 
-sub _call_B {
-    my($self, $arg) = @_;
+sub _is_macos_classic() {
+    return $^O eq 'MacOS';
+}
 
-    my $mod_file = $self->file;
-    my $command = qq{$^X "-MO=Module::Info,$arg" "$mod_file"};
+sub _get_extra_arguments { '' }
+
+sub _call_perl {
+    my($self, $args) = @_;
+
+    my $perl = _is_macos_classic ? 'perl' : $^X;
+    my $command = "$perl $args";
     my @out;
 
     if( _is_win95 ) {
@@ -437,15 +447,37 @@ sub _call_B {
 
         waitpid $pid, 0;
     }
+    elsif( _is_macos_classic ) {
+        @out = `$command`;
+    }
     else {
         @out = `$command 2>&1`;
     }
 
-    if( $? ) {
-        my $exit = $? >> 8;
-        warn join "\n", "B::Module::Info,$arg use failed with $exit saying:", 
-                        @out;
-        return;
+    return ($?, @out);
+}
+
+sub _call_B {
+    my($self, $arg) = @_;
+
+    my $mod_file = $self->file;
+    my $extra_args = $self->_get_extra_arguments;
+    my $command = qq{$extra_args "-MO=Module::Info,$arg" "$mod_file"};
+    my($status, @out) = $self->_call_perl($command);
+
+    if( $status ) {
+        my $exit = $status >> 8;
+        my $msg = join "\n",
+                       "B::Module::Info,$arg use failed with $exit saying:",
+                       @out;
+
+        if( $self->{die_on_compilation_error} ) {
+            die $msg;
+        }
+        else {
+            warn $msg;
+            return;
+        }
     }
 
     @out = grep !/syntax OK$/, @out;
@@ -475,7 +507,10 @@ sub superclasses {
         return;
     }
 
-    my @isa = `$^X -e "require q{$mod_file}; print join qq{\\n}, \@$mod_name\::ISA"`;
+    my $extra_args = $self->_get_extra_arguments;
+    my $command =
+      qq{-e "require q{$mod_file}; print join qq{\\n}, \@$mod_name\::ISA"};
+    my($status, @isa) = $self->_call_perl("$extra_args $command");
     chomp @isa;
     return @isa;
 }
@@ -549,6 +584,36 @@ sub dynamic_method_calls {
 
 =back
 
+=head2 Options
+
+The following methods get/set specific option values for the
+Module::Info object.
+
+=over 4
+
+=item B<die_on_compilation_error>
+
+  $module->die_on_compilation_error(0); # default
+  $module->die_on_compilation_error(1);
+  my $flag = $module->die_on_compilation_error;
+
+Sets/gets the "die on compilation error" flag. Whne the flag is off
+(default), and a module fails to compile, Module::Info simply emits a
+watning and continues. When the flag is on and a module fails to
+compile, Module::Info die()s with the same error message it would use
+in the warning.
+
+=cut
+
+sub die_on_compilation_error {
+    my($self) = shift;
+
+    $self->{die_on_compilation_error} = $_[0] ? 1 : 0 if @_;
+    return $self->{die_on_compilation_error};
+}
+
+=back
+
 =head1 AUTHOR
 
 Michael G Schwern <schwern@pobox.com> with code from ExtUtils::MM_Unix,
@@ -580,4 +645,3 @@ not caching anything.  I'll worry about efficiency later.
 =cut
 
 return 'Stepping on toes is what Schwerns do best!  *poing poing poing*';
-
