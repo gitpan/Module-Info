@@ -6,7 +6,7 @@ use Config;
 require 5.004;
 
 use vars qw($VERSION);
-$VERSION = 0.09;
+$VERSION = '0.10';
 
 
 =head1 NAME
@@ -341,7 +341,7 @@ sub modules_used {
 
     my @used_mods = ();
     push @used_mods, map { my($file) = /^use (\S+)/;  _file2mod($file); }
-                     grep /^use \D/ && /at $mod_file /, @mods;
+                     grep /^use \D/ && /at \Q$mod_file\E /, @mods;
 
     push @used_mods, map { my($file) = /^require bare (\S+)/;  _file2mod($file) }
                      grep /^require bare \D/ , @mods;
@@ -404,7 +404,7 @@ sub subroutines {
     chomp @subs;
     return  map { /^(\S+) at \S+ from (\d+) to (\d+)/; 
                   ($1 => { start => $2, end => $3 }) } 
-            grep { !/syntax OK$/ && /at $mod_file / } @subs;
+            grep { !/syntax OK$/ && /at \Q$mod_file\E / } @subs;
 }
 
 

@@ -22,3 +22,6 @@ require 5.004;
 use 5.004;
 require 5;
 use 5;
+use lib qw(blahbityblahblah);
+
+eval "require Text::Soundex";
