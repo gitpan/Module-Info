@@ -3,9 +3,10 @@ package Module::Info;
 use strict;
 use File::Spec;
 use Config;
+require 5.004;
 
 use vars qw($VERSION);
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 
 =head1 NAME
@@ -346,7 +347,7 @@ sub modules_used {
                      grep /^require bare \D/ , @mods;
 
     push @used_mods, map { /^require not bare (\S+)/; $1 } 
-                     grep /^require not bare/, @mods;
+                     grep /^require not bare \D/, @mods;
 
     my %used_mods = ();
     @used_mods{@used_mods} = (1) x @used_mods;

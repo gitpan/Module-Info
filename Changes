@@ -1,3 +1,6 @@
+0.09  Mon Dec 10 14:55:09 EST 2001
+    - little bug in modules_used() and "require 5.004"
+
 0.08  Mon Dec 10 14:24:56 EST 2001
     * Implemented modules_used()
     - Fixed a little bug in walkoptree_filtered() and $B::Utils::file/line
