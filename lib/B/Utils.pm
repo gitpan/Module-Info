@@ -266,7 +266,7 @@ sub _walkoptree_filtered {
     if ($$op && ($op->flags & OPf_KIDS)) {
         my $kid;
         for ($kid = $op->first; $$kid; $kid = $kid->sibling) {
-            walkoptree_filtered($kid, $filter, $callback, $data);
+            _walkoptree_filtered($kid, $filter, $callback, $data);
         }
     }
 }
