@@ -4,8 +4,8 @@ use lib qw(t/lib);
 use Test::More tests => 59;
 use Config;
 
-my $Mod_Info_VERSION = '0.27';
-my $Mod_Info_Pack_VERSION = $] >= 5.009002 ? '0.270' : '0.27';
+my $Mod_Info_VERSION = '0.28';
+my $Mod_Info_Pack_VERSION = $] >= 5.009002 ? '0.280' : '0.28';
 
 my @old5lib = defined $ENV{PERL5LIB} ? ($ENV{PERL5LIB}) : ();
 $ENV{PERL5LIB} = join $Config{path_sep}, 'blib/lib', @old5lib;
@@ -30,13 +30,24 @@ my @expected_subs = qw(
                        subroutines        
                        superclasses
                        die_on_compilation_error
-                       _is_macos_classic
-                       _is_win95
                        _call_B
-                       _call_perl
                        _get_extra_arguments
                        subroutines_called
                        dynamic_method_calls
+                       safe
+                      );
+
+my @unsafe_subs   = qw(
+                       _eval
+                       _call_perl
+                       _is_win95
+                       _is_macos_classic
+                      );
+
+my @safe_subs     = qw(
+                       _eval
+                       _call_perl
+                       _create_compartment
                       );
 
 can_ok('Module::Info', @expected_subs);
@@ -56,25 +67,29 @@ ok( !$mod_info->is_core,                    '    not a core module' );
 SKIP: {
     skip "Only works on 5.6.1 and up.", 8 unless $] >= 5.006001;
 
-    @expected_subs = map "Module::Info::$_", @expected_subs;
+    @expected_subs = ( ( map "Module::Info::$_", @expected_subs ),
+                       ( map "Module::Info::Safe::$_", @safe_subs ),
+                       ( map "Module::Info::Unsafe::$_", @unsafe_subs ) );
 
     my @packages = $mod_info->packages_inside;
-    is( @packages, 1,                   'Found a single package inside' );
-    is( $packages[0], 'Module::Info',   '  and its what we want' );
+    is( @packages, 3,                   'Found three packages inside' );
+    is_deeply( [sort @packages],
+               [sort qw(Module::Info Module::Info::Safe Module::Info::Unsafe)],
+               '  and its what we want' );
 
     my %versions = $mod_info->package_versions;
-    is( keys %versions, 1,                '1 package with package_versions()');
+    is( keys %versions, 3,                '1 package with package_versions()');
     is( $versions{Module::Info}, $Mod_Info_Pack_VERSION, 'version is correct');
 
     my %subs = $mod_info->subroutines;
     is( keys %subs, @expected_subs,    'Found all the subroutines' );
     is_deeply( [sort keys %subs], 
                [sort @expected_subs],  '   names' );
-    
+
     my @mods = $mod_info->modules_used;
-    is( @mods, 6,           'Found all modules used' );
-    is_deeply( [sort @mods], [sort qw(strict File::Spec Config 
-                                      Carp IPC::Open3 vars)],
+    is( @mods, 7,           'Found all modules used' );
+    is_deeply( [sort @mods], [sort qw(strict File::Spec Config
+                                      Carp IPC::Open3 vars Safe)],
                             '    the right ones' );
 }
 
