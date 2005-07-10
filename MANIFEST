@@ -19,3 +19,4 @@ t/lib/Test/Simple.pm
 t/n0_die_on_error.t
 t/n1_modules_required.t
 t/n2_safe.t
+t/n3_version.t
