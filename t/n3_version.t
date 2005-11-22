@@ -2,12 +2,13 @@
 
 use strict;
 use lib 't/lib';
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Module::Info;
 
 my $has_version_pm = eval 'use version; 1';
 
 my $moo = Module::Info->new_from_module( 'Moo' );
+my $boo = Module::Info->new_from_module( 'Boo' );
 my $moo_ver;
 my $foo_ver;
 
@@ -20,6 +21,7 @@ if( $has_version_pm ) {
 
 is( $moo->use_version, 0 );
 is( $moo->version, '0.12' );
+is( $boo->version, '1.35', 'proper quoting in complex expression' );
 
 SKIP: {
     skip 'version.pm not found', 5 unless $has_version_pm;

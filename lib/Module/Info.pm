@@ -10,7 +10,7 @@ my $has_version_pm = eval 'use version; 1';
 
 use vars qw($VERSION @ISA $AUTOLOAD);
 # quotes 'version' for 5.004
-$VERSION = eval 'use version; 1' ? 'version'->new('0.28_50') : '0.28_50';
+$VERSION = eval 'use version; 1' ? 'version'->new('0.29') : '0.29';
 $VERSION = eval $VERSION;
 
 
@@ -244,9 +244,9 @@ sub version {
 
                       local $1$2;
                       \$$2=undef; do {
-                          $_
+                          %s
                       }; \$$2
-        }, ( $safe ? '' : 'no strict;' );
+        }, ( $safe ? '' : 'no strict;' ), $_;
         local $^W = 0;
         $result = $self->_eval($eval);
         warn "Could not eval '$eval' in $parsefile: $@" if $@ && !$safe;

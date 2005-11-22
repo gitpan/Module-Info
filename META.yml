@@ -1,6 +1,6 @@
---- #YAML:1.0
+---
 name: Module-Info
-version: 0.28_5
+version: 0.290
 author:
   - Mattia Barbon <mbarbon@cpan.org>
 abstract: Information about Perl modules
@@ -17,14 +17,14 @@ provides:
     version: 0.04_01
   Module::Info:
     file: lib/Module/Info.pm
-    version: 0.28_5
+    version: 0.290
   Module::Info::Safe:
     file: lib/Module/Info.pm
-    version: 0.28_5
+    version: 0.290
   Module::Info::Unsafe:
     file: lib/Module/Info.pm
-    version: 0.28_5
+    version: 0.290
   Module::Info::_version:
     file: lib/Module/Info.pm
-    version: 0.28_5
+    version: 0.290
 generated_by: Module::Build version 0.2611
