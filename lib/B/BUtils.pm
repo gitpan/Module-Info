@@ -1,8 +1,9 @@
+# forked version of B::Utils; needs to merge it ASAP
 package B::Utils;
 
 use 5.006;
-use strict;
 use warnings;
+use vars '$DEBUG';
 our @EXPORT_OK = qw(all_starts all_roots anon_subs
                     walkoptree_simple walkoptree_filtered
                     walkallops_simple walkallops_filtered
@@ -10,7 +11,7 @@ our @EXPORT_OK = qw(all_starts all_roots anon_subs
                     opgrep
                    );
 sub import {
-  my $pack = shift;
+  my $pack = __PACKAGE__; shift;
   my @exports = @_;
   my $caller = caller;
   my %EOK = map {$_ => 1} @EXPORT_OK;
@@ -24,13 +25,18 @@ sub import {
   }
 }
 
-our $VERSION = '0.04_01'; # 0.04 with some Schwern patches
+our $VERSION = '0.04_02'; # 0.04 with some Schwern patches
 
 use B qw(main_start main_root walksymtable class OPf_KIDS);
 
 my (%starts, %roots, @anon_subs);
 
 our @bad_stashes = qw(B Carp DB Exporter warnings Cwd Config CORE blib strict DynaLoader vars XSLoader AutoLoader base);
+
+sub null {
+    my $op = shift;
+    class( $op ) eq 'NULL';
+}
 
 { my $_subsdone=0;
 sub _init { # To ensure runtimeness.
@@ -166,7 +172,6 @@ sub B::OP::kids {
     return @rv, @more_rv;
 }
 
-
 =item C<< $op->first >>
 
 =item C<< $op->last >>
@@ -197,7 +202,6 @@ foreach my $type (qw(first last other)) {
     }
 }
 
-
 =item C<< $op->parent >>
 
 Returns the parent node in the op tree, if possible. Currently "possible" means
@@ -210,21 +214,27 @@ that.
 
 =cut
 
-# This is probably the most efficient algorithm for finding the parent given the
-# next node in execution order and the children of an op. You'll be glad to hear
-# that it doesn't do a full search of the tree from the root, but it searches
-# ever-higher subtrees using a breathtaking double recursion. It works on the
-# principle that the C<next> pointer will always point to an op further northeast
-# on the tree, and hence will be heading upwards toward the parent.
-
 sub B::OP::parent {
     my $target = shift;
+    printf( "parent %s %s=(0x%07x)\n",
+	    B::class( $target),
+	    $target->oldname,
+	    $$target )
+	if $DEBUG;
+
     die "I'm not sure how to do this yet. I'm sure there is a way. If you know, please email me."
         if (!$target->seq);
-    my (%deadend, $search);
-    $search = sub {
-        my $node = shift || return undef;
 
+    my (%deadend, $search_kids);
+    $search_kids = sub {
+        my $node = shift || return undef;
+	
+	printf( "Searching from %s %s=(0x%07x)\n",
+		class($node)||'?',
+		$node->oldname,
+		$$node )
+	    if $DEBUG;
+		
         # Go up a level if we've got stuck, and search (for the same
         # $target) from a higher vantage point.
         return $search->($node->parent) if exists $deadend{$node};
@@ -476,6 +486,10 @@ sub opgrep {
     }
     return @rv;
 }
+
+package B::BUtils;
+
+@ISA = qw(B::Utils);
 
 1;
 

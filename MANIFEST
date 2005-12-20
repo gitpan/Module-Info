@@ -6,7 +6,7 @@ Makefile.PL
 bin/module_info
 bin/pfunc
 lib/B/Module/Info.pm
-lib/B/Utils.pm
+lib/B/BUtils.pm
 lib/Module/Info.pm
 t/Module-Info.t
 t/lib/Bar.pm

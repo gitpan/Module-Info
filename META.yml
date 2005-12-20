@@ -1,30 +1,11 @@
----
-name: Module-Info
-version: 0.290
-author:
-  - Mattia Barbon <mbarbon@cpan.org>
-abstract: Information about Perl modules
-license: perl
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         Module-Info
+version:      0.30
+version_from: lib/Module/Info.pm
+installdirs:  site
 requires:
-  File::Spec: 0.08
-dynamic_config: 0
-provides:
-  B::Module::Info:
-    file: lib/B/Module/Info.pm
-    version: 0.24
-  B::Utils:
-    file: lib/B/Utils.pm
-    version: 0.04_01
-  Module::Info:
-    file: lib/Module/Info.pm
-    version: 0.290
-  Module::Info::Safe:
-    file: lib/Module/Info.pm
-    version: 0.290
-  Module::Info::Unsafe:
-    file: lib/Module/Info.pm
-    version: 0.290
-  Module::Info::_version:
-    file: lib/Module/Info.pm
-    version: 0.290
-generated_by: Module::Build version 0.2611
+    File::Spec:                    0.8
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

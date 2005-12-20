@@ -1,3 +1,7 @@
+0.30  Tue Dec 20 20:17:09 CET 2005
+    * Renamed the forked B::Utils to B::BUtils to avoid clashes
+      until it is merged into the mainline.
+
 0.29  Tue Nov 22 21:28:26 CET 2005
     * Fixed version() for complex expressions.
     - Corrected some POD errors in module_info.
