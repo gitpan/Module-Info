@@ -1,3 +1,7 @@
+0.31  Mon May 28 21:40:10 CEST 2007
+    * Fixed tests in presence of version.pm 0.72 or newer.
+    - Added -h option to module_info.
+
 0.30  Tue Dec 20 20:17:09 CET 2005
     * Renamed the forked B::Utils to B::BUtils to avoid clashes
       until it is merged into the mainline.
