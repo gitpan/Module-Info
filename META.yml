@@ -1,6 +1,6 @@
 # http://module-build.sourceforge.net/META-spec.html
 name:         Module-Info
-version:      0.31_01
+version:      0.32
 version_from: lib/Module/Info.pm
 installdirs:  site
 author:       Mattia Barbon <mbarbon@cpan.org>
