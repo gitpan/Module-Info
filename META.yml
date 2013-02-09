@@ -1,9 +1,9 @@
 # http://module-build.sourceforge.net/META-spec.html
 name:         Module-Info
-version:      0.32
+version:      0.33
 version_from: lib/Module/Info.pm
 installdirs:  site
-author:       Mattia Barbon <mbarbon@cpan.org>
+author:       ARRAY(0x1009adfe8)
 abstract:     Information about Perl modules
 license:      perl
 requires:
@@ -17,7 +17,7 @@ no_index:
 dynamic_config: 0
 
 distribution_type: module
-generated_by: ExtUtils::MY_Metafile version 0.09, EUMM-6.56.
+generated_by: ExtUtils::MY_Metafile version 0.09, EUMM-6.62.
 meta-spec:
   version: 1.3
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
