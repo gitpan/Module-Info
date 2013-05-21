@@ -1,0 +1,61 @@
+{
+   "abstract" : "Information about Perl modules",
+   "author" : [
+      "Mattia Barbon <mbarbon@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Module-Info",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.40"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "File::Spec" : "0.08"
+         }
+      }
+   },
+   "provides" : {
+      "B::BUtils" : {
+         "file" : "lib/B/BUtils.pm",
+         "version" : 0
+      },
+      "B::Module::Info" : {
+         "file" : "lib/B/Module/Info.pm",
+         "version" : "0.24"
+      },
+      "B::Utils" : {
+         "file" : "lib/B/BUtils.pm",
+         "version" : "0.04_02"
+      },
+      "Module::Info" : {
+         "file" : "lib/Module/Info.pm",
+         "version" : "0.34"
+      },
+      "Module::Info::Safe" : {
+         "file" : "lib/Module/Info.pm",
+         "version" : 0
+      },
+      "Module::Info::Unsafe" : {
+         "file" : "lib/Module/Info.pm",
+         "version" : 0
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "0.34"
+}

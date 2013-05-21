@@ -6,11 +6,11 @@ use Config;
 
 my $has_version_pm = eval 'use version; 1';
 my $version_pm_VERSION = $has_version_pm ? 'version'->VERSION : 0;
-my $Mod_Info_VERSION = '0.33';
+my $Mod_Info_VERSION = '0.34';
 # 0.280 vith version.pm, 0.28 without, except for development versions
-my $Mod_Info_Pack_VERSION = !$has_version_pm             ? '0.33' :   # 0.3101
-         $has_version_pm && $version_pm_VERSION > '0.72' ? '0.33' :   # 0.3101
-                                                           '0.33';    # 0.310001
+my $Mod_Info_Pack_VERSION = !$has_version_pm             ? '0.34' :   # 0.3101
+         $has_version_pm && $version_pm_VERSION > '0.72' ? '0.34' :   # 0.3101
+                                                           '0.34';    # 0.310001
 
 my @old5lib = defined $ENV{PERL5LIB} ? ($ENV{PERL5LIB}) : ();
 $ENV{PERL5LIB} = join $Config{path_sep}, 'blib/lib', @old5lib;
@@ -116,29 +116,27 @@ is( $mod_info->file, File::Spec->rel2abs('blib/lib/Module/Info.pm'),
 ok( !$mod_info->is_core,                    '    not a core module' );
 
 
-# Grab the core version of Text::Soundex and hope it hasn't been
+# Grab the core version of Class::Struct and hope it hasn't been
 # deleted.
 @core_inc = map { File::Spec->canonpath($_) }
   ($Config{installarchlib}, $Config{installprivlib},
    $Config{archlib}, $Config{privlib});
-$mod_info = Module::Info->new_from_module('Text::Soundex', @core_inc);
+$mod_info = Module::Info->new_from_module('Class::Struct', @core_inc);
 if( $mod_info ) {
-    is( $mod_info->name, 'Text::Soundex',       '    name()' );
-
-    # dunno what the version will be, 5.004's had none.
+    is( $mod_info->name, 'Class::Struct',         '    name()' );
 
     ok( grep($mod_info->inc_dir eq $_, @core_inc),       '    inc_dir()' );
     is( $mod_info->file, 
-        File::Spec->catfile( $mod_info->inc_dir, 'Text', 'Soundex.pm' ),
+        File::Spec->catfile( $mod_info->inc_dir, 'Class', 'Struct.pm' ),
                                                 '    file()');
     ok( $mod_info->is_core,                     '    core module' );
 } else {
-    $mod_info = Module::Info->new_from_module('Text::Soundex');
+    $mod_info = Module::Info->new_from_module('Class::Struct');
 
-    ok( $mod_info, 'could load Text::Soundex' );
-    ok( $mod_info, 'could load Text::Soundex' );
-    ok( $mod_info, 'could load Text::Soundex' );
-    ok( $mod_info, 'could load Text::Soundex' );
+    ok( $mod_info, 'could load Class::Struct' );
+    ok( $mod_info, 'could load Class::Struct' );
+    ok( $mod_info, 'could load Class::Struct' );
+    ok( $mod_info, 'could load Class::Struct' );
 }
 
 $mod_info = Module::Info->new_from_loaded('Module::Info');
