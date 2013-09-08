@@ -4,7 +4,7 @@
       "Mattia Barbon <mbarbon@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -40,7 +40,7 @@
       },
       "Module::Info" : {
          "file" : "lib/Module/Info.pm",
-         "version" : "0.34"
+         "version" : "0.35"
       },
       "Module::Info::Safe" : {
          "file" : "lib/Module/Info.pm",
@@ -57,5 +57,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.34"
+   "version" : "0.35"
 }

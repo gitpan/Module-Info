@@ -10,7 +10,7 @@ my $has_version_pm = eval 'use version; 1';
 
 use vars qw($VERSION @ISA $AUTOLOAD);
 # quotes 'version' for 5.004
-$VERSION = eval 'use version; 1' ? 'version'->new('0.34') : '0.34';
+$VERSION = eval 'use version; 1' ? 'version'->new('0.35') : '0.35';
 $VERSION = eval $VERSION;
 
 
@@ -237,6 +237,13 @@ sub version {
         next if $inpod || /^\s*#/;
 
         chomp;
+        # taken from ExtUtils::MM_Unix 6.63_02
+        next if /^\s*(if|unless|elsif)/;
+        if (m{^\s*package\s+\w[\w\:\']*\s+(v?[0-9._]+)\s*;}) {
+            local $^W = 0;
+            $result = $1;
+            last;
+        }
         next unless /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
         my $eval = sprintf qq{
                       package Module::Info::_version;
@@ -320,7 +327,7 @@ B<WARNING!>  From here down reliability drops rapidly!
 
 The following methods get their information by compiling the module
 and examining the opcode tree.  The module will be compiled in a
-seperate process so as not to disturb the current program.
+separate process so as not to disturb the current program.
 
 They will only work on 5.6.1 and up and requires the B::Utils module.
 
@@ -734,7 +741,7 @@ their ears about B.
 Code refs in @INC are currently ignored.  If this bothers you submit a
 patch.
 
-superclasses() is cheating and just loading the module in a seperate
+superclasses() is cheating and just loading the module in a separate
 process and looking at @ISA.  I don't think its worth the trouble to
 go through and parse the opcode tree as it still requires loading the
 module and running all the BEGIN blocks.  Patches welcome.
